@@ -1,0 +1,46 @@
+# Variables de entorno — nunca subir al repositorio
+.env
+.env.*
+!.env.example
+
+# Archivos de Claude — no forman parte del codigo fuente
+CLAUDE.md
+.claude/
+.claudeignore
+claude_context/
+docs/
+*.md
+!README.md
+
+# Dependencias y entornos virtuales
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+node_modules/
+
+# Artefactos de build
+*.egg-info/
+dist/
+build/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+
+# Logs
+*.log
+logs/
+
+# Superpowers (brainstorming visual)
+.superpowers/
+
+# Archivos del proyecto que no deben subirse
+G4_Tarea 1 2 y 3 Curso UDD Grupo 4.pdf
+documentacion_db_ejercicios_ia.md
