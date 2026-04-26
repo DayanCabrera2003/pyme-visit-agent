@@ -1,32 +1,55 @@
-/* Variables globales de color y espaciado del sistema */
+/* Variables globales de color, tipografia y espaciado del sistema */
 :root {
-  --color-fondo: #0a0a0a;
-  --color-superficie: #111111;
-  --color-superficie-2: #161616;
-  --color-borde: #1f1f1f;
-  --color-borde-2: #2d2d2d;
-  --color-texto-principal: #f3f4f6;
-  --color-texto-secundario: #9ca3af;
-  --color-texto-apagado: #6b7280;
-  --color-texto-muy-apagado: #374151;
-  --color-azul: #3b82f6;
-  --color-azul-oscuro: #1e3a5f;
-  --color-azul-borde: #1d4ed8;
-  --color-verde: #16a34a;
-  --color-verde-oscuro: #14532d;
-  --color-verde-texto: #86efac;
-  --color-naranja: #fb923c;
-  --color-naranja-oscuro: #431407;
-  --color-rojo: #f87171;
-  --color-rojo-oscuro: #2d1010;
-  --color-morado-oscuro: #2e1065;
-  --color-morado-texto: #c4b5fd;
+  /* Fondos — escala de negro a carbon steel */
+  --color-fondo:        #0A0A0A; /* The Vault: negro puro, profundidad maxima */
+  --color-superficie:   #111111;
+  --color-superficie-2: #262626; /* Carbon Steel: color de cajas fuertes, para contenedores */
 
-  --radio: 8px;
-  --radio-sm: 4px;
+  /* Bordes — carbon steel para dar estructura sin decorar */
+  --color-borde:   #262626;
+  --color-borde-2: #333333;
+
+  /* Texto — escala de platinum a casi-negro */
+  --color-texto-principal:   #E5E5E5; /* Platinum: cifras y nombres de alta prioridad */
+  --color-texto-secundario:  #9ca3af;
+  --color-texto-apagado:     #6b7280;
+  --color-texto-muy-apagado: #374151;
+
+  /* Acento principal — Security Green, color de terminales financieros clasicos */
+  --color-acento:       #00FF41;
+
+  /* Verde (estados de exito y progreso activo) — alineado con acento */
+  --color-verde:        #00FF41;
+  --color-verde-oscuro: #001a00; /* fondo oscuro para badges de exito */
+  --color-verde-texto:  #00FF41;
+
+  /* Azul — reservado para elementos interactivos secundarios (inputs, links) */
+  --color-azul:        #3b82f6;
+  --color-azul-oscuro: #1e3a5f;
+  --color-azul-borde:  #1d4ed8;
+
+  /* Semanticos — alertas y tags */
+  --color-naranja:        #fb923c;
+  --color-naranja-oscuro: #431407;
+  --color-rojo:           #f87171;
+  --color-rojo-oscuro:    #2d1010;
+  --color-morado-oscuro:  #2e1065;
+  --color-morado-texto:   #c4b5fd;
+
+  /* Tipografia */
+  /* Serif: autoridad editorial para nombres de empresa (Old Money vs Algoritmo) */
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  /* Mono: precision matematica para datos, scores y terminal log */
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Geometria — sin redondeo en componentes principales, minimo en controles */
+  --radio:      4px;  /* reducido de 8px: menos plastico, mas instrumental */
+  --radio-card: 0px;  /* tarjetas sin redondeo: estetica de panel de control */
+  --radio-sm:   2px;
   --radio-full: 9999px;
 
-  --sombra-azul: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  --sombra-azul:   0 0 0 3px rgba(59, 130, 246, 0.15);
+  --sombra-acento: 0 0 0 3px rgba(0, 255, 65, 0.12);
 }
 
 /* Reset minimal — solo lo necesario para consistencia entre navegadores */
@@ -44,36 +67,35 @@ html, body {
 body {
   background: var(--color-fondo);
   color: var(--color-texto-principal);
+  /* Sistema por defecto para texto UI; mono y serif se aplican por componente */
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   font-size: 13px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Scrollbar oscura para los paneles internos */
-::-webkit-scrollbar { width: 6px; }
+/* Scrollbar oscura para paneles internos */
+::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: var(--color-fondo); }
-::-webkit-scrollbar-thumb { background: var(--color-borde-2); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--color-borde-2); border-radius: 0; }
 
-/* Clase utilitaria para ocultar elementos */
 [hidden] { display: none !important; }
 
-/* Pantallas alternadas: solo una visible a la vez */
 .pantalla {
   height: 100vh;
   overflow: hidden;
 }
 
-/* Label de seccion — texto uppercase espaciado */
+/* Label de seccion — tipografia mono para dar lectura tecnica a los encabezados */
 .seccion-label {
-  font-size: 10px;
+  font-family: var(--font-mono);
+  font-size: 9px;
   color: var(--color-texto-apagado);
-  letter-spacing: 1.5px;
+  letter-spacing: 2px;
   text-transform: uppercase;
   margin-bottom: 8px;
 }
 
-/* Toast de error global */
 .toast-error {
   position: fixed;
   bottom: 24px;
@@ -83,13 +105,14 @@ body {
   border: 1px solid var(--color-rojo);
   border-radius: var(--radio);
   padding: 12px 18px;
-  font-size: 13px;
+  font-family: var(--font-mono);
+  font-size: 12px;
   max-width: 360px;
   z-index: 9999;
-  animation: fadeIn 0.2s ease;
+  animation: fadeIn 0.15s ease;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
