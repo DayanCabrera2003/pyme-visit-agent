@@ -1,0 +1,110 @@
+/* Estilos del output final: grid de briefs y header de exportacion */
+
+#output-final {
+  height: calc(100vh - 114px);
+  overflow-y: auto;
+  padding: 0 0 40px;
+}
+
+.output-header {
+  padding: 24px 32px 20px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--color-borde);
+}
+.output-titulo { font-size: 22px; font-weight: 700; color: var(--color-texto-principal); }
+.output-subtitulo { font-size: 12px; color: var(--color-texto-apagado); margin-top: 4px; }
+
+.output-stats { display: flex; gap: 28px; }
+.output-stat { text-align: center; }
+.output-stat span { display: block; font-size: 26px; font-weight: 700; color: #93c5fd; }
+.output-stat small { font-size: 10px; color: var(--color-texto-apagado); letter-spacing: 1px; text-transform: uppercase; }
+
+.output-export-bar {
+  padding: 13px 32px;
+  background: #0d1117;
+  border-bottom: 1px solid var(--color-borde);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.export-nota { font-size: 12px; color: var(--color-texto-apagado); }
+.btn-exportar {
+  background: var(--color-azul-borde);
+  color: white;
+  border: none;
+  border-radius: var(--radio);
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.btn-exportar:hover { background: #1e40af; }
+
+/* Grid de tarjetas de brief */
+.briefs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 24px 32px;
+}
+
+/* Tarjeta individual de brief */
+.brief-card {
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.brief-card[data-prioridad="1"] { border-left: 3px solid var(--color-azul); }
+.brief-card[data-prioridad="2"] { border-left: 3px solid #8b5cf6; }
+.brief-card[data-prioridad="3"] { border-left: 3px solid #f59e0b; }
+.brief-card[data-prioridad="4"] { border-left: 3px solid var(--color-verde); }
+.brief-card[data-prioridad="5"] { border-left: 3px solid var(--color-texto-apagado); }
+
+.brief-top {
+  padding: 14px 16px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid var(--color-borde);
+}
+.brief-rank { font-size: 10px; color: var(--color-texto-apagado); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; }
+.brief-empresa { font-size: 14px; font-weight: 700; color: var(--color-texto-principal); }
+.brief-rubro { font-size: 11px; color: var(--color-texto-apagado); margin-top: 3px; }
+
+.score-circulo {
+  width: 44px; height: 44px;
+  border-radius: var(--radio-full);
+  background: var(--color-superficie-2);
+  border: 1px solid var(--color-borde-2);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.score-circulo-n { font-size: 15px; font-weight: 700; color: #93c5fd; line-height: 1; }
+.score-circulo-l { font-size: 9px; color: var(--color-texto-apagado); }
+
+.brief-tags-fila { padding: 8px 16px; display: flex; gap: 5px; flex-wrap: wrap; border-bottom: 1px solid #141414; }
+
+.brief-metricas {
+  padding: 10px 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  border-bottom: 1px solid #141414;
+  background: #0d0d0d;
+}
+.metrica-val { font-size: 13px; font-weight: 700; color: var(--color-texto-principal); }
+.metrica-lbl { font-size: 10px; color: var(--color-texto-apagado); margin-top: 1px; }
+
+.brief-seccion { padding: 10px 16px; border-bottom: 1px solid #141414; }
+.brief-seccion:last-child { border-bottom: none; }
+.brief-texto { font-size: 12px; color: var(--color-texto-secundario); line-height: 1.65; }
+.brief-preguntas { padding-left: 0; list-style: none; }
+.brief-preguntas li { font-size: 12px; color: var(--color-texto-apagado); margin-bottom: 5px; padding-left: 14px; position: relative; }
+.brief-preguntas li::before { content: "›"; position: absolute; left: 0; color: var(--color-texto-muy-apagado); }
