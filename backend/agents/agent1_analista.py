@@ -277,7 +277,7 @@ class Agente1Runner:
                 session_id=self.session_id,
                 new_message=types.Content(
                     role="user",
-                    parts=[types.Part.from_text(prompt)],
+                    parts=[types.Part.from_text(text=prompt)],
                 ),
             ):
                 # Capturar tokens de razonamiento para streaming
