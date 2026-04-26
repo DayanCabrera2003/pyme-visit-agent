@@ -95,6 +95,8 @@ class Agente2Runner:
                         "campana_vigente": True,
                         "tipo_campana_vigente": detalle.get("tipo_campana_vigente"),
                     })
+            self.queue.put_nowait({"tipo": "progreso", "paso": 1, "mensaje": f"Campañas verificadas — {len(resultado)} activas"})
+            self.queue.put_nowait({"tipo": "progreso", "paso": 2, "mensaje": "Seleccionando visitas óptimas..."})
             return json.dumps(resultado, ensure_ascii=False)
         except Exception as e:
             logger.error("Error al obtener campanas vigentes: %s", e)
@@ -111,6 +113,7 @@ class Agente2Runner:
             Confirmacion o mensaje de error.
         """
         try:
+            self.queue.put_nowait({"tipo": "progreso", "paso": 3, "mensaje": f"Definiendo estrategia — {len(items)} visitas"})
             visitas_validadas = [VisitaSeleccionada(**item) for item in items]
             self.sesiones[self.session_id]["visitas_seleccionadas"] = [
                 v.model_dump() for v in visitas_validadas

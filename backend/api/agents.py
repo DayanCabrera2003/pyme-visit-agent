@@ -66,8 +66,12 @@ async def _generar_sse(runner_instance, metodo_ejecutar, *args):
             tipo = evento.get("tipo")
 
             if tipo == "token":
-                data = json.dumps({"text": evento["text"]}, ensure_ascii=False)
-                yield f"event: token\ndata: {data}\n\n"
+                # Tokens del LLM no se exponen al frontend (se muestran como progreso estructurado)
+                pass
+
+            elif tipo == "progreso":
+                data = json.dumps({"paso": evento["paso"], "mensaje": evento["mensaje"]}, ensure_ascii=False)
+                yield f"event: progreso\ndata: {data}\n\n"
 
             elif tipo == "resultado":
                 data = json.dumps({"items": evento["items"]}, ensure_ascii=False, default=str)

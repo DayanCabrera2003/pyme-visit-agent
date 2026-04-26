@@ -49,6 +49,7 @@ class Agente3Runner:
         self.sesiones = sesiones
         self.session_id = session_id
         self.queue: asyncio.Queue = asyncio.Queue()
+        self._progreso_2_enviado = False
 
     def obtener_detalle_empresa(self, rut_empresa: str) -> str:
         """
@@ -62,6 +63,9 @@ class Agente3Runner:
         """
         try:
             detalle = queries.obtener_detalle_empresa(rut_empresa)
+            if not self._progreso_2_enviado:
+                self.queue.put_nowait({"tipo": "progreso", "paso": 2, "mensaje": "Redactando briefs comerciales..."})
+                self._progreso_2_enviado = True
             if detalle is None:
                 return json.dumps({"error": f"Empresa {rut_empresa} no encontrada."})
             return json.dumps(detalle, ensure_ascii=False, default=str)
@@ -80,6 +84,7 @@ class Agente3Runner:
             Confirmacion o mensaje de error.
         """
         try:
+            self.queue.put_nowait({"tipo": "progreso", "paso": 3, "mensaje": f"Finalizando {len(briefs)} briefs..."})
             briefs_validados = []
             for b in briefs:
                 # Construir el sub-objeto metricas si viene plano
@@ -117,6 +122,8 @@ class Agente3Runner:
             visitas: Lista de VisitaSeleccionada aprobadas.
             comentario: Comentario del ejecutivo para orientar los briefs.
         """
+        self.queue.put_nowait({"tipo": "progreso", "paso": 1, "mensaje": "Obteniendo datos de empresas..."})
+
         agente = Agent(
             name="generador_briefs_pyme",
             model="gemini-2.5-flash",

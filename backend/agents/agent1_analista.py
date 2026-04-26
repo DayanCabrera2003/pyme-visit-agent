@@ -134,6 +134,8 @@ class Agente1Runner:
                 "Cartera cargada: %d empresas para '%s'",
                 len(empresas), nombre_ejecutivo
             )
+            self.queue.put_nowait({"tipo": "progreso", "paso": 1, "mensaje": f"Cartera cargada — {len(empresas)} empresas"})
+            self.queue.put_nowait({"tipo": "progreso", "paso": 2, "mensaje": "Analizando empresas..."})
             return json.dumps(empresas, ensure_ascii=False, default=str)
         except Exception as e:
             logger.error("Error al obtener cartera de '%s': %s", nombre_ejecutivo, e)
@@ -163,6 +165,7 @@ class Agente1Runner:
             Confirmacion de guardado.
         """
         try:
+            self.queue.put_nowait({"tipo": "progreso", "paso": 3, "mensaje": f"Generando ranking — {len(items)} empresas"})
             ranking_validado = [RankingItem(**_normalizar_ranking_item(item)) for item in items]
             self.sesiones[self.session_id]["cartera_completa"] = [
                 r.model_dump() for r in ranking_validado
