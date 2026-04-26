@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planificador de Visitas PYME</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/login.css">
+  <link rel="stylesheet" href="css/stepper.css">
+  <link rel="stylesheet" href="css/agent-card.css">
+  <link rel="stylesheet" href="css/briefs.css">
+</head>
+<body>
+
+  <!-- Pantalla de login: visible al inicio, oculta al ingresar -->
+  <div id="pantalla-login" class="pantalla">
+    <div class="login-contenedor">
+      <div class="login-marca">
+        <div class="login-logo">P</div>
+        <div class="login-titulo">Planificador de Visitas</div>
+        <div class="login-subtitulo">Segmento PYME</div>
+      </div>
+      <div class="login-campo">
+        <label class="login-label">Ejecutivo</label>
+        <div class="login-buscador">
+          <span class="login-icono-buscar">⌕</span>
+          <input
+            type="text"
+            id="input-busqueda"
+            class="login-input"
+            placeholder="Busca tu nombre..."
+            autocomplete="off"
+          >
+        </div>
+        <div id="lista-ejecutivos" class="login-lista" hidden></div>
+        <div id="login-error" class="login-error" hidden>
+          Ejecutivo no encontrado. Verifica tu nombre.
+        </div>
+      </div>
+      <button id="btn-ingresar" class="login-btn" disabled>
+        Ingresar al sistema
+      </button>
+    </div>
+  </div>
+
+  <!-- Pantalla principal: oculta hasta que el ejecutivo ingrese -->
+  <div id="pantalla-principal" class="pantalla" hidden>
+
+    <!-- Topbar con datos del ejecutivo -->
+    <header class="topbar">
+      <div class="topbar-marca">Planificador de Visitas · Segmento PYME</div>
+      <div class="topbar-usuario">
+        <div class="topbar-info">
+          <div id="topbar-nombre" class="topbar-nombre"></div>
+          <div id="topbar-detalle" class="topbar-detalle"></div>
+        </div>
+        <div id="topbar-avatar" class="topbar-avatar"></div>
+      </div>
+    </header>
+
+    <!-- Stepper de 3 pasos -->
+    <nav class="stepper" aria-label="Progreso del flujo">
+      <div class="step" id="step-1" data-estado="pendiente">
+        <div class="step-circulo"><span class="step-numero">1</span></div>
+        <div class="step-etiqueta">
+          <div class="step-nombre">Análisis de Cartera</div>
+          <div class="step-sub" id="step-1-sub">En espera</div>
+        </div>
+      </div>
+      <div class="step-linea" id="linea-1-2"></div>
+      <div class="step" id="step-2" data-estado="pendiente">
+        <div class="step-circulo"><span class="step-numero">2</span></div>
+        <div class="step-etiqueta">
+          <div class="step-nombre">Estrategia Comercial</div>
+          <div class="step-sub" id="step-2-sub">En espera</div>
+        </div>
+      </div>
+      <div class="step-linea" id="linea-2-3"></div>
+      <div class="step" id="step-3" data-estado="pendiente">
+        <div class="step-circulo"><span class="step-numero">3</span></div>
+        <div class="step-etiqueta">
+          <div class="step-nombre">Briefs de Visita</div>
+          <div class="step-sub" id="step-3-sub">En espera</div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Layout principal: panel izquierdo + panel derecho -->
+    <div class="layout-principal">
+
+      <!-- Panel izquierdo: cards de agentes -->
+      <main class="panel-agentes">
+
+        <!-- Card Agente 1 -->
+        <section class="agent-card" id="card-agente-1" data-agente="1">
+          <div class="agent-header">
+            <div class="agent-icono agent-icono--azul">A1</div>
+            <div class="agent-info">
+              <div class="agent-nombre">Agente 1 — Análisis de Cartera</div>
+            </div>
+            <span class="agent-badge" id="badge-1">En espera</span>
+          </div>
+          <div class="agent-cuerpo" id="cuerpo-agente-1" hidden>
+            <div class="razonamiento-seccion">
+              <div class="seccion-label">Razonamiento del agente</div>
+              <div class="razonamiento-texto" id="razonamiento-1"></div>
+            </div>
+            <div class="resultados-seccion" id="resultados-1" hidden>
+              <div class="seccion-label">Empresas analizadas — desmarca las que no aplican</div>
+              <div class="tabla-empresas" id="tabla-empresas-1"></div>
+            </div>
+            <div class="aprobacion-seccion" id="aprobacion-1" hidden>
+              <div class="seccion-label">Comentario opcional para el Agente 2</div>
+              <textarea
+                id="comentario-1"
+                class="comentario-input"
+                placeholder="Ej: Prioriza empresas del sector salud esta semana..."
+              ></textarea>
+              <button class="btn-continuar" id="btn-aprobar-1">
+                Continuar al Agente 2 →
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Card Agente 2 -->
+        <section class="agent-card" id="card-agente-2" data-agente="2">
+          <div class="agent-header">
+            <div class="agent-icono agent-icono--morado">A2</div>
+            <div class="agent-info">
+              <div class="agent-nombre">Agente 2 — Estrategia Comercial</div>
+            </div>
+            <span class="agent-badge" id="badge-2">En espera</span>
+          </div>
+          <div class="agent-cuerpo" id="cuerpo-agente-2" hidden>
+            <div class="razonamiento-seccion">
+              <div class="seccion-label">Razonamiento del agente</div>
+              <div class="razonamiento-texto" id="razonamiento-2"></div>
+            </div>
+            <div class="resultados-seccion" id="resultados-2" hidden>
+              <div class="seccion-label">Visitas seleccionadas — desmarca las que no aplican</div>
+              <div class="tabla-empresas" id="tabla-empresas-2"></div>
+            </div>
+            <div class="aprobacion-seccion" id="aprobacion-2" hidden>
+              <div class="seccion-label">Comentario opcional para el Agente 3</div>
+              <textarea
+                id="comentario-2"
+                class="comentario-input"
+                placeholder="Ej: Incluye el argumento de excedente de caja en el brief..."
+              ></textarea>
+              <button class="btn-continuar" id="btn-aprobar-2">
+                Continuar al Agente 3 →
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Card Agente 3 -->
+        <section class="agent-card" id="card-agente-3" data-agente="3">
+          <div class="agent-header">
+            <div class="agent-icono agent-icono--verde">A3</div>
+            <div class="agent-info">
+              <div class="agent-nombre">Agente 3 — Briefs de Visita</div>
+            </div>
+            <span class="agent-badge" id="badge-3">En espera</span>
+          </div>
+          <div class="agent-cuerpo" id="cuerpo-agente-3" hidden>
+            <div class="razonamiento-seccion">
+              <div class="seccion-label">Generando briefs...</div>
+              <div class="razonamiento-texto" id="razonamiento-3"></div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- Panel derecho: resumen de la semana -->
+      <aside class="panel-resumen">
+        <div class="seccion-label">Resumen de la semana</div>
+        <div class="resumen-stat">
+          <div class="stat-valor" id="stat-visitas">—</div>
+          <div class="stat-etiqueta">Visitas planificadas</div>
+        </div>
+        <div class="resumen-stat">
+          <div class="stat-valor" id="stat-score">—</div>
+          <div class="stat-etiqueta">Score promedio</div>
+        </div>
+        <hr class="resumen-divider">
+        <div class="seccion-label">Empresas confirmadas</div>
+        <div id="lista-confirmadas"></div>
+      </aside>
+
+    </div>
+
+    <!-- Output final: grid de briefs (visible cuando Agente 3 completa) -->
+    <div id="output-final" hidden>
+      <div class="output-header">
+        <div class="output-titulo-bloque">
+          <div class="seccion-label">Plan generado</div>
+          <h1 class="output-titulo">Plan de Visitas PYME</h1>
+          <div id="output-subtitulo" class="output-subtitulo"></div>
+        </div>
+        <div class="output-stats">
+          <div class="output-stat"><span id="out-n-visitas">0</span><small>Visitas</small></div>
+          <div class="output-stat"><span id="out-score">0</span><small>Score prom.</small></div>
+          <div class="output-stat"><span id="out-campanas">0</span><small>Con campaña</small></div>
+        </div>
+      </div>
+      <div class="output-export-bar">
+        <span class="export-nota">Plan listo para la semana.</span>
+        <button id="btn-exportar-pdf" class="btn-exportar">
+          ⬇ Exportar como PDF
+        </button>
+      </div>
+      <div id="grid-briefs" class="briefs-grid"></div>
+    </div>
+
+    <!-- Toast de error global -->
+    <div id="toast-error" class="toast-error" hidden></div>
+
+  </div><!-- fin pantalla-principal -->
+
+  <script src="js/session.js"></script>
+  <script src="js/login.js"></script>
+  <script src="js/stream.js"></script>
+  <script src="js/approval.js"></script>
+  <script src="js/export.js"></script>
+</body>
+</html>
