@@ -45,36 +45,48 @@
 
 .agent-cuerpo { }
 
-/* Seccion de razonamiento con streaming */
-.razonamiento-seccion {
-  padding: 14px 18px;
+/* Seccion de progreso estructurado */
+.progreso-seccion {
+  padding: 16px 18px;
   border-bottom: 1px solid var(--color-borde);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
-.razonamiento-texto {
-  color: var(--color-texto-secundario);
-  font-size: 12px;
-  line-height: 1.7;
-  min-height: 40px;
-  max-height: 180px;
-  overflow-y: auto;
-  white-space: pre-wrap;
-  font-family: inherit;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-borde-2) transparent;
+
+.progreso-paso {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
-/* Cursor parpadeante al final del texto en streaming */
-.razonamiento-texto::after {
-  content: "";
-  display: inline-block;
-  width: 7px;
-  height: 13px;
+
+.paso-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+
+.progreso-paso[data-estado="pendiente"] .paso-dot { background: var(--color-borde-2); }
+.progreso-paso[data-estado="activo"]   .paso-dot {
   background: var(--color-azul);
-  vertical-align: text-bottom;
-  margin-left: 2px;
-  animation: parpadeo 1s step-end infinite;
+  animation: pulso-dot 1.2s ease-in-out infinite;
 }
-.razonamiento-texto.completo::after { display: none; }
-@keyframes parpadeo { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+.progreso-paso[data-estado="hecho"]    .paso-dot { background: var(--color-verde); }
+
+.paso-texto {
+  font-size: 12px;
+  color: var(--color-texto-muy-apagado);
+  transition: color 0.3s;
+}
+.progreso-paso[data-estado="activo"] .paso-texto  { color: var(--color-texto-principal); font-weight: 500; }
+.progreso-paso[data-estado="hecho"]  .paso-texto  { color: var(--color-verde-texto); }
+
+@keyframes pulso-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.75); }
+}
 
 /* Tabla de empresas con checkboxes */
 .resultados-seccion {
@@ -85,13 +97,41 @@
 
 .empresa-fila {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
   padding: 8px 4px;
   border-bottom: 1px solid #141414;
 }
 .empresa-fila:last-child { border-bottom: none; }
 .empresa-fila.descartada .empresa-nombre { text-decoration: line-through; color: var(--color-texto-muy-apagado); }
+
+.fila-principal {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Justificacion expandible */
+.empresa-just {
+  font-size: 11px;
+  color: var(--color-texto-apagado);
+  line-height: 1.55;
+  padding: 8px 0 2px 26px;
+  border-top: 1px solid #141414;
+  margin-top: 6px;
+}
+
+.btn-just {
+  background: none;
+  border: none;
+  color: var(--color-texto-muy-apagado);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0 2px;
+  flex-shrink: 0;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.btn-just:hover { color: var(--color-texto-secundario); }
 
 .empresa-rank { color: var(--color-texto-apagado); font-size: 12px; width: 16px; text-align: right; flex-shrink: 0; }
 .empresa-check {

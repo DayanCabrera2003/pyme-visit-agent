@@ -1,49 +1,47 @@
 /*
- * stream.js — Conexion SSE y renderizado de razonamiento en tiempo real.
+ * stream.js — Conexion SSE y actualizacion de progreso estructurado.
  *
- * Responsabilidad: conectar al endpoint SSE de cada agente, renderizar
- * el razonamiento letra a letra, y disparar el renderizado de resultados
- * cuando llega el evento 'resultado'.
- *
- * Usa EventSource (nativo del navegador) para recibir los eventos SSE.
- * No usa WebSocket porque la comunicacion es unidireccional.
+ * Muestra el avance del agente como 3 pasos visuales (punto pulsante → verde),
+ * no como texto crudo. Los tokens del LLM se ignoran en la UI.
  */
 
-// Referencia al EventSource activo (null si no hay stream en curso)
 let eventoSource = null;
 
 /**
- * Inicia el agente N conectando al SSE del backend.
- * Actualiza el UI del agente: abre la card, muestra badge "Analizando".
+ * Inicia el agente N: abre SSE, resetea pasos y activa el primer paso.
  *
  * @param {number} nAgente - Numero del agente (1, 2 o 3).
  */
 function iniciarAgente(nAgente) {
-  const card = document.getElementById(`card-agente-${nAgente}`);
+  const card   = document.getElementById(`card-agente-${nAgente}`);
   const cuerpo = document.getElementById(`cuerpo-agente-${nAgente}`);
-  const badge = document.getElementById(`badge-${nAgente}`);
-  const razonamiento = document.getElementById(`razonamiento-${nAgente}`);
+  const badge  = document.getElementById(`badge-${nAgente}`);
 
-  // Expandir card y marcar como activo
   card.dataset.estado = 'activo';
   cuerpo.hidden = false;
-  razonamiento.textContent = '';
-  razonamiento.classList.remove('completo');
   badge.textContent = '● Analizando';
   badge.className = 'agent-badge agent-badge--analizando';
 
-  // Actualizar stepper
+  // Resetear todos los pasos al estado pendiente
+  for (let i = 1; i <= 3; i++) {
+    const paso = document.getElementById(`p${nAgente}-${i}`);
+    if (paso) paso.dataset.estado = 'pendiente';
+  }
+  // Activar primer paso de inmediato
+  const p1 = document.getElementById(`p${nAgente}-1`);
+  if (p1) p1.dataset.estado = 'activo';
+
   actualizarStepper(nAgente, 'activo');
 
-  // Conectar SSE
   const url = `${API_BASE}/agent/${nAgente}/stream?session_id=${sesion.sessionId}`;
   eventoSource = new EventSource(url);
 
-  eventoSource.addEventListener('token', e => {
+  // Tokens del LLM: pensamiento interno, no se muestra al usuario
+  eventoSource.addEventListener('token', () => {});
+
+  eventoSource.addEventListener('progreso', e => {
     const data = JSON.parse(e.data);
-    razonamiento.textContent += data.text;
-    // Auto-scroll al final del razonamiento
-    razonamiento.scrollTop = razonamiento.scrollHeight;
+    actualizarProgreso(nAgente, data.paso, data.mensaje);
   });
 
   eventoSource.addEventListener('resultado', e => {
@@ -62,20 +60,21 @@ function iniciarAgente(nAgente) {
 
   eventoSource.addEventListener('done', () => {
     eventoSource.close();
-    razonamiento.classList.add('completo');
+    // Marcar todos los pasos como completados
+    for (let i = 1; i <= 3; i++) {
+      const paso = document.getElementById(`p${nAgente}-${i}`);
+      if (paso) paso.dataset.estado = 'hecho';
+    }
     badge.textContent = 'Listo';
     badge.className = 'agent-badge agent-badge--listo';
 
-    // Si es el agente 3, mostrar output final directamente
     if (nAgente === 3) {
       mostrarOutputFinal();
     } else {
-      // Mostrar seccion de aprobacion para agentes 1 y 2
       document.getElementById(`aprobacion-${nAgente}`).hidden = false;
     }
   });
 
-  // Si la conexion SSE falla a nivel de red, mostrar boton de reintento
   eventoSource.onerror = () => {
     if (eventoSource.readyState === EventSource.CLOSED) {
       mostrarToastError('La conexión se interrumpió. Puedes reintentar el agente.');
@@ -85,14 +84,34 @@ function iniciarAgente(nAgente) {
 }
 
 /**
- * Actualiza el estado visual del stepper.
+ * Actualiza el estado visual de los pasos de progreso.
+ * Los pasos anteriores al actual quedan en "hecho", el actual en "activo".
  *
- * @param {number} nAgente - Numero del agente activo.
- * @param {string} estado - "activo" | "completado".
+ * @param {number} nAgente - Numero del agente.
+ * @param {number} paso    - Numero del paso activo (1, 2 o 3).
+ * @param {string} mensaje - Texto a mostrar en el paso activo.
+ */
+function actualizarProgreso(nAgente, paso, mensaje) {
+  for (let i = 1; i < paso; i++) {
+    const el = document.getElementById(`p${nAgente}-${i}`);
+    if (el) el.dataset.estado = 'hecho';
+  }
+  const el = document.getElementById(`p${nAgente}-${paso}`);
+  if (el) {
+    el.dataset.estado = 'activo';
+    el.querySelector('.paso-texto').textContent = mensaje;
+  }
+}
+
+/**
+ * Actualiza el estado visual del stepper superior.
+ *
+ * @param {number} nAgente - Numero del agente.
+ * @param {string} estado  - "activo" | "completado".
  */
 function actualizarStepper(nAgente, estado) {
   const step = document.getElementById(`step-${nAgente}`);
-  const sub = document.getElementById(`step-${nAgente}-sub`);
+  const sub  = document.getElementById(`step-${nAgente}-sub`);
   step.dataset.estado = estado;
   sub.textContent = estado === 'activo' ? 'En análisis...' : 'Completado';
 
@@ -103,9 +122,9 @@ function actualizarStepper(nAgente, estado) {
 }
 
 /**
- * Agrega un boton de "Reintentar" en la card del agente.
+ * Muestra boton de reintento cuando el agente falla.
  *
- * @param {number} nAgente - Numero del agente.
+ * @param {number} nAgente - Numero del agente fallido.
  */
 function mostrarBotonReintentar(nAgente) {
   const aprobacion = document.getElementById(`aprobacion-${nAgente}`);
@@ -126,17 +145,15 @@ function mostrarOutputFinal() {
   outputFinal.hidden = false;
   actualizarStepper(3, 'completado');
 
-  // Rellenar header del output
   const briefs = sesion.briefs || [];
   document.getElementById('output-subtitulo').textContent =
     `${sesion.nombreEjecutivo} · ${sesion.sucursal} · ${briefs.length} visitas priorizadas`;
   document.getElementById('out-n-visitas').textContent = briefs.length;
   const scores = briefs.map(b => b.score_compuesto || 0);
   document.getElementById('out-score').textContent =
-    Math.round(scores.reduce((a,b) => a+b, 0) / (scores.length || 1));
+    Math.round(scores.reduce((a, b) => a + b, 0) / (scores.length || 1));
   document.getElementById('out-campanas').textContent =
     briefs.filter(b => (b.tags || []).some(t => t.includes('Campaña'))).length;
 
-  // Renderizar grid de briefs
   renderizarBriefs(briefs);
 }

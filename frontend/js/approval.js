@@ -35,25 +35,44 @@ function renderizarResultados(nAgente, items) {
     }).join('');
 
     const pct = Math.round(score);
+    const tieneJust = !!item.justificacion;
 
     return `
       <div class="empresa-fila" id="fila-${nAgente}-${rut}">
-        <span class="empresa-rank">${idx + 1}</span>
-        <div class="empresa-check marcado" data-rut="${rut}" data-agente="${nAgente}"
-             onclick="toggleEmpresa(this)">✓</div>
-        <span class="empresa-nombre">${nombre}</span>
-        ${item.rubro ? `<span class="empresa-rubro">${item.rubro}</span>` : ''}
-        <div class="empresa-tags">${tagsHtml}</div>
-        <div class="score-wrap">
-          <div class="score-bar"><div class="score-fill" style="width:${pct}%"></div></div>
-          <div class="score-num">${pct}</div>
+        <div class="fila-principal">
+          <span class="empresa-rank">${idx + 1}</span>
+          <div class="empresa-check marcado" data-rut="${rut}" data-agente="${nAgente}"
+               onclick="toggleEmpresa(this)">✓</div>
+          <span class="empresa-nombre">${nombre}</span>
+          ${item.rubro ? `<span class="empresa-rubro">${item.rubro}</span>` : ''}
+          <div class="empresa-tags">${tagsHtml}</div>
+          <div class="score-wrap">
+            <div class="score-bar"><div class="score-fill" style="width:${pct}%"></div></div>
+            <div class="score-num">${pct}</div>
+          </div>
+          ${tieneJust ? `<button class="btn-just" onclick="toggleJust(${nAgente}, '${rut}')">▾</button>` : ''}
         </div>
+        ${tieneJust ? `<div class="empresa-just" id="just-${nAgente}-${rut}" hidden>${item.justificacion}</div>` : ''}
       </div>
     `;
   }).join('');
 
   seccion.hidden = false;
   actualizarResumen(items);
+}
+
+/**
+ * Muestra u oculta la justificacion de una empresa.
+ *
+ * @param {number} nAgente - Numero del agente.
+ * @param {string} rut     - RUT de la empresa.
+ */
+function toggleJust(nAgente, rut) {
+  const justEl = document.getElementById(`just-${nAgente}-${rut}`);
+  const fila   = document.getElementById(`fila-${nAgente}-${rut}`);
+  const btn    = fila.querySelector('.btn-just');
+  justEl.hidden = !justEl.hidden;
+  btn.textContent = justEl.hidden ? '▾' : '▴';
 }
 
 /**
@@ -85,7 +104,7 @@ function toggleEmpresa(check) {
  */
 async function enviarAprobacion(nAgente) {
   const checks = document.querySelectorAll(
-    `.empresa-check[data-agente="${nAgente}"]:not(.marcado)`
+    `.fila-principal .empresa-check[data-agente="${nAgente}"]:not(.marcado)`
   );
   const descartados = Array.from(checks).map(c => c.dataset.rut);
   const comentario = (document.getElementById(`comentario-${nAgente}`) || {}).value || '';
