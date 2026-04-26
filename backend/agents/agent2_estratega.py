@@ -148,10 +148,17 @@ class Agente2Runner:
             ],
         )
 
+        session_service = InMemorySessionService()
+        await session_service.create_session(
+            app_name="pyme_visit_agent",
+            user_id=self.session_id,
+            session_id=self.session_id,
+        )
+
         runner = Runner(
             agent=agente,
             app_name="pyme_visit_agent",
-            session_service=InMemorySessionService(),
+            session_service=session_service,
         )
 
         ranking_json = json.dumps(ranking_aprobado, ensure_ascii=False, default=str)

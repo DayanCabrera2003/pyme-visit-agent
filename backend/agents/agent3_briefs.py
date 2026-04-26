@@ -128,10 +128,17 @@ class Agente3Runner:
             ],
         )
 
+        session_service = InMemorySessionService()
+        await session_service.create_session(
+            app_name="pyme_visit_agent",
+            user_id=self.session_id,
+            session_id=self.session_id,
+        )
+
         runner = Runner(
             agent=agente,
             app_name="pyme_visit_agent",
-            session_service=InMemorySessionService(),
+            session_service=session_service,
         )
 
         visitas_json = json.dumps(visitas, ensure_ascii=False, default=str)
