@@ -1,24 +1,26 @@
 # Framework web y servidor
-fastapi==0.115.0
-uvicorn[standard]==0.30.0
+fastapi==0.136.0
+uvicorn[standard]==0.46.0
 
 # Google ADK y Gemini
-google-adk==1.4.1
-google-genai==1.14.0
+# Part.from_text requiere argumento keyword (text=) desde genai >= 1.17.0.
+# Agentes usan Agent, Runner, InMemorySessionService — API estable desde adk 1.5.0.
+google-adk==1.31.1
+google-genai==1.73.1
 
 # Base de datos
-psycopg2-binary==2.9.9
+psycopg2-binary==2.9.12
 
 # Validacion de datos
-pydantic==2.7.0
+pydantic==2.13.3
 
 # Variables de entorno
-python-dotenv==1.0.1
+python-dotenv==1.2.2
 
 # Generacion de PDF
-weasyprint==62.3
+weasyprint==68.1
 
 # Tests
-pytest==8.2.0
+pytest==8.4.2
 pytest-asyncio==0.23.7
-httpx==0.27.0
+httpx==0.28.1
