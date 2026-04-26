@@ -13,33 +13,39 @@
   margin-bottom: 40px;
 }
 
+/* Logo cuadrado sin redondeo: identidad de sistema institucional */
 .login-logo {
   width: 56px;
   height: 56px;
-  background: var(--color-azul-oscuro);
-  border: 1px solid var(--color-azul);
-  border-radius: var(--radio);
+  background: var(--color-verde-oscuro);
+  border: 1px solid var(--color-acento);
+  border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: var(--font-mono);
   font-size: 22px;
   font-weight: 700;
-  color: var(--color-azul);
+  color: var(--color-acento);
   margin: 0 auto 14px;
 }
 
+/* Serif para el titulo: autoridad editorial, no interfaz de producto */
 .login-titulo {
-  font-size: 20px;
+  font-family: var(--font-serif);
+  font-size: 24px;
   font-weight: 700;
   color: var(--color-texto-principal);
+  letter-spacing: 0.5px;
 }
 
 .login-subtitulo {
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
   color: var(--color-texto-apagado);
-  letter-spacing: 2px;
+  letter-spacing: 3px;
   text-transform: uppercase;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .login-campo {
@@ -50,9 +56,10 @@
 
 .login-label {
   display: block;
-  font-size: 11px;
+  font-family: var(--font-mono);
+  font-size: 10px;
   color: var(--color-texto-apagado);
-  letter-spacing: 1px;
+  letter-spacing: 2px;
   text-transform: uppercase;
   margin-bottom: 8px;
 }
@@ -63,14 +70,14 @@
   gap: 10px;
   background: var(--color-superficie);
   border: 1px solid var(--color-borde-2);
-  border-radius: var(--radio);
+  border-radius: 0;
   padding: 11px 14px;
   transition: border-color 0.15s;
 }
 
 .login-buscador:focus-within {
-  border-color: var(--color-azul);
-  box-shadow: var(--sombra-azul);
+  border-color: var(--color-acento);
+  box-shadow: var(--sombra-acento);
 }
 
 .login-icono-buscar {
@@ -99,13 +106,13 @@
   top: 100%;
   left: 0;
   right: 0;
-  margin-top: 4px;
+  margin-top: 2px;
   background: var(--color-superficie);
   border: 1px solid var(--color-borde-2);
-  border-radius: var(--radio);
+  border-radius: 0;
   overflow: hidden;
   z-index: 100;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6);
 }
 
 /* Item de ejecutivo en la lista */
@@ -123,13 +130,15 @@
   background: var(--color-superficie-2);
 }
 
-/* Avatar con iniciales del ejecutivo */
+/* Avatar con iniciales — cuadrado en este sistema */
 .ejecutivo-avatar {
   width: 32px;
   height: 32px;
-  border-radius: var(--radio-full);
-  background: var(--color-azul-oscuro);
-  color: #93c5fd;
+  border-radius: 0;
+  background: var(--color-verde-oscuro);
+  border: 1px solid var(--color-acento);
+  color: var(--color-acento);
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 700;
   display: flex;
@@ -144,14 +153,18 @@
 }
 
 .ejecutivo-sucursal {
-  font-size: 11px;
+  font-family: var(--font-mono);
+  font-size: 10px;
   color: var(--color-texto-apagado);
   margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .login-error {
+  font-family: var(--font-mono);
   color: var(--color-rojo);
-  font-size: 12px;
+  font-size: 11px;
   margin-top: 8px;
 }
 
@@ -160,22 +173,83 @@
   max-width: 380px;
   margin-top: 16px;
   padding: 12px;
-  background: var(--color-azul-borde);
-  color: white;
-  border: none;
-  border-radius: var(--radio);
-  font-size: 14px;
+  background: var(--color-verde-oscuro);
+  color: var(--color-acento);
+  border: 1px solid var(--color-acento);
+  border-radius: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
   font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
   cursor: pointer;
   transition: background 0.15s, opacity 0.15s;
-  font-family: inherit;
 }
 
 .login-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.3;
   cursor: not-allowed;
 }
 
 .login-btn:not(:disabled):hover {
-  background: #1e40af;
+  background: #002200;
+}
+
+/* Topbar — barra superior con datos del ejecutivo activo */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 44px;
+  background: var(--color-superficie);
+  border-bottom: 1px solid var(--color-borde);
+  flex-shrink: 0;
+}
+
+.topbar-marca {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-texto-apagado);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.topbar-usuario {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topbar-info {
+  text-align: right;
+}
+
+.topbar-nombre {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-texto-principal);
+}
+
+.topbar-detalle {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-texto-apagado);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.topbar-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 0;
+  background: var(--color-verde-oscuro);
+  border: 1px solid var(--color-acento);
+  color: var(--color-acento);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
