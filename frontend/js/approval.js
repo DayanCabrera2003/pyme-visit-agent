@@ -95,7 +95,7 @@ async function enviarAprobacion(nAgente) {
   btn.textContent = 'Procesando...';
 
   try {
-    const resp = await fetch(`/api/agent/${nAgente}/approve`, {
+    const resp = await fetch(`${API_BASE}/agent/${nAgente}/approve`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

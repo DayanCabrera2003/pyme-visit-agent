@@ -36,7 +36,7 @@ function iniciarAgente(nAgente) {
   actualizarStepper(nAgente, 'activo');
 
   // Conectar SSE
-  const url = `/api/agent/${nAgente}/stream?session_id=${sesion.sessionId}`;
+  const url = `${API_BASE}/agent/${nAgente}/stream?session_id=${sesion.sessionId}`;
   eventoSource = new EventSource(url);
 
   eventoSource.addEventListener('token', e => {

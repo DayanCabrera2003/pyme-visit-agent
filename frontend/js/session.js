@@ -23,7 +23,7 @@ const sesion = {
  */
 async function iniciarSesion(nombreEjecutivo) {
   try {
-    const resp = await fetch('/api/session/start', {
+    const resp = await fetch(`${API_BASE}/session/start`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ nombre_ejecutivo: nombreEjecutivo }),

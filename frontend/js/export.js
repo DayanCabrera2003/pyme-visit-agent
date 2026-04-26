@@ -81,7 +81,7 @@ document.getElementById('btn-exportar-pdf').addEventListener('click', async () =
   btn.textContent = 'Generando PDF...';
 
   try {
-    const resp = await fetch(`/api/plan/export?session_id=${sesion.sessionId}`);
+    const resp = await fetch(`${API_BASE}/plan/export?session_id=${sesion.sessionId}`);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 
     // Descargar el blob del PDF

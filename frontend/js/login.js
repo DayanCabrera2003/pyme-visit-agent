@@ -25,7 +25,7 @@ let ejecutivoSeleccionado = null;
  */
 async function cargarEjecutivos() {
   try {
-    const resp = await fetch('/api/ejecutivos/');
+    const resp = await fetch(`${API_BASE}/ejecutivos/`);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     ejecutivos = await resp.json();
   } catch (err) {
