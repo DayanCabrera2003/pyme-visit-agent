@@ -37,10 +37,9 @@ PROCESO OBLIGATORIO:
 1. Llama a obtener_cartera() para cargar las empresas del ejecutivo.
 2. Llama a obtener_mes_actual() para saber el mes actual.
 3. Analiza CADA empresa considerando los 6 criterios de priorizacion.
-4. Para cada empresa, escribe en tu razonamiento:
-   - El score compuesto calculado
-   - Por que recibe ese score
-   - Que oportunidad principal tiene
+4. Para cada empresa escribe UNA sola linea con formato:
+   "NombreEmpresa — score X.X — motivo principal"
+   Ejemplo: "Importadora ABC — score 72.3 — campana activa + SoW bajo"
 5. Al terminar de analizar todas las empresas, llama a guardar_ranking()
    con el listado completo ordenado de mayor a menor score.
 
@@ -62,8 +61,8 @@ FORMATO EXACTO de cada item en guardar_ranking (usa EXACTAMENTE estos nombres de
   "tags": ["Tag1", "Tag2"]
 }
 
-FORMATO DE RAZONAMIENTO: Escribe en espanol claro y directo.
-No uses bullets ni markdown. Escribe parrafos cortos mientras analizas.
+FORMATO DE RAZONAMIENTO: Una linea por empresa, sin markdown.
+Sé conciso. El detalle va en el campo "justificacion" de guardar_ranking, no en el razonamiento.
 Termina siempre llamando a guardar_ranking().
 """
 

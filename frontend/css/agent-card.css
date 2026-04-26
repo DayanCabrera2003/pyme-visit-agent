@@ -53,8 +53,14 @@
 .razonamiento-texto {
   color: var(--color-texto-secundario);
   font-size: 12px;
-  line-height: 1.75;
+  line-height: 1.7;
   min-height: 40px;
+  max-height: 180px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  font-family: inherit;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-borde-2) transparent;
 }
 /* Cursor parpadeante al final del texto en streaming */
 .razonamiento-texto::after {
