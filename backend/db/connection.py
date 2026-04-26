@@ -30,19 +30,24 @@ def inicializar_pool() -> None:
     Inicializa el pool de conexiones.
 
     Debe llamarse una vez al arrancar el servidor (en main.py).
-    Lanza psycopg2.OperationalError si la BD no es accesible.
+    No lanza excepcion si falla — el app arranca igual y los endpoints
+    de BD devuelven 503 hasta que la conexion este disponible.
+    Supabase pooler requiere sslmode=require; se agrega si no esta presente.
     """
     global _pool
+    dsn = DATABASE_URL
+    if "sslmode" not in dsn:
+        dsn += "?sslmode=require"
     try:
         _pool = pg_pool.SimpleConnectionPool(
             minconn=1,
             maxconn=5,
-            dsn=DATABASE_URL,
+            dsn=dsn,
         )
         logger.info("Pool de conexiones a Supabase inicializado correctamente.")
     except psycopg2.OperationalError as e:
         logger.error("No se pudo conectar a Supabase: %s", e)
-        raise
+        logger.warning("El servidor arranca sin BD. Los endpoints de datos devolvern 503.")
 
 
 def cerrar_pool() -> None:

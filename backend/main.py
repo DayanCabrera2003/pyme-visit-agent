@@ -41,9 +41,12 @@ async def tarea_limpieza_sesiones():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Inicializa recursos al arrancar y los libera al apagar."""
-    # Arranque
-    inicializar_pool()
-    logger.info("Pool de BD inicializado.")
+    # Arranque — la conexion a BD no es critica para el arranque del servidor
+    try:
+        inicializar_pool()
+        logger.info("Pool de BD inicializado.")
+    except Exception as e:
+        logger.error("Pool de BD no disponible al arrancar: %s", e)
 
     # Lanzar limpieza de sesiones como tarea de fondo
     tarea = asyncio.create_task(tarea_limpieza_sesiones())
