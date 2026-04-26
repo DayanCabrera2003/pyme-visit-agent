@@ -1,0 +1,158 @@
+/* Cards de los agentes con razonamiento, resultados y aprobacion */
+
+.agent-card {
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: 10px;
+  margin-bottom: 14px;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+.agent-card[data-estado="activo"] { border-color: var(--color-azul-borde); }
+.agent-card[data-estado="completado"] { border-color: var(--color-verde); opacity: 0.75; }
+
+.agent-header {
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.agent-icono {
+  width: 36px; height: 36px;
+  border-radius: var(--radio);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
+}
+.agent-icono--azul   { background: var(--color-azul-oscuro); color: #93c5fd; }
+.agent-icono--morado { background: var(--color-morado-oscuro); color: var(--color-morado-texto); }
+.agent-icono--verde  { background: var(--color-verde-oscuro); color: var(--color-verde-texto); }
+
+.agent-nombre { font-size: 14px; font-weight: 600; color: var(--color-texto-principal); }
+
+.agent-badge {
+  margin-left: auto;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: var(--radio-full);
+  background: var(--color-superficie-2);
+  color: var(--color-texto-apagado);
+  white-space: nowrap;
+}
+.agent-badge--analizando { background: var(--color-azul-oscuro); color: #93c5fd; }
+.agent-badge--listo { background: var(--color-verde-oscuro); color: var(--color-verde-texto); }
+
+.agent-cuerpo { }
+
+/* Seccion de razonamiento con streaming */
+.razonamiento-seccion {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--color-borde);
+}
+.razonamiento-texto {
+  color: var(--color-texto-secundario);
+  font-size: 12px;
+  line-height: 1.75;
+  min-height: 40px;
+}
+/* Cursor parpadeante al final del texto en streaming */
+.razonamiento-texto::after {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 13px;
+  background: var(--color-azul);
+  vertical-align: text-bottom;
+  margin-left: 2px;
+  animation: parpadeo 1s step-end infinite;
+}
+.razonamiento-texto.completo::after { display: none; }
+@keyframes parpadeo { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* Tabla de empresas con checkboxes */
+.resultados-seccion {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--color-borde);
+}
+.tabla-empresas { display: flex; flex-direction: column; gap: 2px; }
+
+.empresa-fila {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 4px;
+  border-bottom: 1px solid #141414;
+}
+.empresa-fila:last-child { border-bottom: none; }
+.empresa-fila.descartada .empresa-nombre { text-decoration: line-through; color: var(--color-texto-muy-apagado); }
+
+.empresa-rank { color: var(--color-texto-apagado); font-size: 12px; width: 16px; text-align: right; flex-shrink: 0; }
+.empresa-check {
+  width: 16px; height: 16px;
+  border: 1px solid var(--color-borde-2);
+  border-radius: var(--radio-sm);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 10px;
+  transition: background 0.1s, border-color 0.1s;
+}
+.empresa-check.marcado { background: var(--color-azul-borde); border-color: var(--color-azul-borde); color: white; }
+.empresa-nombre { flex: 1; color: var(--color-texto-principal); font-size: 12px; }
+.empresa-rubro { color: var(--color-texto-apagado); font-size: 11px; flex: 1; }
+
+/* Tags de contexto */
+.empresa-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.tag {
+  font-size: 10px; padding: 2px 8px;
+  border-radius: var(--radio-full);
+  font-weight: 500; white-space: nowrap;
+}
+.tag--campana  { background: var(--color-naranja-oscuro); color: var(--color-naranja); }
+.tag--seasonal { background: var(--color-verde-oscuro); color: var(--color-verde-texto); }
+.tag--riesgo   { background: var(--color-rojo-oscuro); color: var(--color-rojo); }
+.tag--sow      { background: var(--color-azul-oscuro); color: #93c5fd; }
+
+/* Score bar */
+.score-wrap { width: 56px; text-align: right; flex-shrink: 0; }
+.score-bar { height: 3px; background: var(--color-borde); border-radius: 2px; overflow: hidden; margin-bottom: 2px; }
+.score-fill { height: 100%; background: var(--color-azul); border-radius: 2px; }
+.score-num { font-size: 11px; color: var(--color-texto-apagado); }
+
+/* Seccion de aprobacion y comentario */
+.aprobacion-seccion {
+  padding: 14px 18px;
+  background: #0d0d0d;
+}
+.comentario-input {
+  width: 100%;
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde-2);
+  border-radius: var(--radio);
+  color: var(--color-texto-secundario);
+  padding: 10px 12px;
+  font-size: 12px;
+  resize: none;
+  height: 52px;
+  font-family: inherit;
+  margin-bottom: 10px;
+  transition: border-color 0.15s;
+}
+.comentario-input:focus { outline: none; border-color: var(--color-azul); box-shadow: var(--sombra-azul); }
+.comentario-input::placeholder { color: var(--color-texto-muy-apagado); }
+
+.btn-continuar {
+  width: 100%;
+  background: var(--color-azul-borde);
+  color: white;
+  border: none;
+  border-radius: var(--radio);
+  padding: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.btn-continuar:hover { background: #1e40af; }
+.btn-continuar:disabled { opacity: 0.5; cursor: not-allowed; }
