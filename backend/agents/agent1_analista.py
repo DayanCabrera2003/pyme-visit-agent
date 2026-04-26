@@ -53,6 +53,15 @@ complementar con tu analisis cualitativo):
 - Share of wallet bajo < 30%: potencial de crecimiento (10%)
 - Riesgo de perdida: meses sin venta > 3 (10%)
 
+FORMATO EXACTO de cada item en guardar_ranking (usa EXACTAMENTE estos nombres de campo):
+{
+  "rut_empresa": "12345678-9",
+  "razon_social": "Nombre de la empresa",
+  "score_compuesto": 75.5,
+  "justificacion": "Parrafo explicando el score",
+  "tags": ["Tag1", "Tag2"]
+}
+
 FORMATO DE RAZONAMIENTO: Escribe en espanol claro y directo.
 No uses bullets ni markdown. Escribe parrafos cortos mientras analizas.
 Termina siempre llamando a guardar_ranking().
@@ -64,6 +73,29 @@ MESES_ES = {
     5: "mayo", 6: "junio", 7: "julio", 8: "agosto",
     9: "septiembre", 10: "octubre", 11: "noviembre", 12: "diciembre",
 }
+
+# Mapeo de nombres alternativos que el LLM puede usar en guardar_ranking.
+# El LLM no siempre usa el nombre exacto del campo Pydantic.
+_ALIAS_RANKING = {
+    "rut": "rut_empresa",
+    "id_empresa": "rut_empresa",
+    "empresa": "razon_social",
+    "nombre": "razon_social",
+    "nombre_empresa": "razon_social",
+    "score": "score_compuesto",
+    "puntaje": "score_compuesto",
+    "razon": "justificacion",
+    "justificacion_score": "justificacion",
+    "motivo": "justificacion",
+    "explicacion": "justificacion",
+}
+
+def _normalizar_ranking_item(item: dict) -> dict:
+    """Renombra claves alternativas del LLM al nombre exacto que espera RankingItem."""
+    normalizado = {}
+    for k, v in item.items():
+        normalizado[_ALIAS_RANKING.get(k, k)] = v
+    return normalizado
 
 
 class Agente1Runner:
@@ -132,7 +164,7 @@ class Agente1Runner:
             Confirmacion de guardado.
         """
         try:
-            ranking_validado = [RankingItem(**item) for item in items]
+            ranking_validado = [RankingItem(**_normalizar_ranking_item(item)) for item in items]
             self.sesiones[self.session_id]["cartera_completa"] = [
                 r.model_dump() for r in ranking_validado
             ]
