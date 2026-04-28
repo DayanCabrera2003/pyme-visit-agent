@@ -205,24 +205,42 @@ class Agente3Runner:
             f"Llama a guardar_briefs() con todos los briefs al terminar."
         )
 
-        try:
-            async for event in runner.run_async(
-                user_id=self.session_id,
-                session_id=self.session_id,
-                new_message=types.Content(
-                    role="user",
-                    parts=[types.Part.from_text(text=prompt)],
-                ),
-            ):
-                if event.content and event.content.parts:
-                    for part in event.content.parts:
-                        if hasattr(part, "text") and part.text:
-                            await self.queue.put({"tipo": "token", "text": part.text})
-        except Exception as e:
-            logger.error("Error en Agente 3 para sesion %s: %s", self.session_id, e)
-            await self.queue.put({
-                "tipo": "error",
-                "mensaje": "Error al generar los briefs. Por favor reintenta.",
-            })
-        finally:
-            await self.queue.put({"tipo": "done"})
+        max_intentos = 3
+        espera_base = 2  # segundos
+
+        for intento in range(1, max_intentos + 1):
+            try:
+                async for event in runner.run_async(
+                    user_id=self.session_id,
+                    session_id=self.session_id,
+                    new_message=types.Content(
+                        role="user",
+                        parts=[types.Part.from_text(text=prompt)],
+                    ),
+                ):
+                    if event.content and event.content.parts:
+                        for part in event.content.parts:
+                            if hasattr(part, "text") and part.text:
+                                await self.queue.put({"tipo": "token", "text": part.text})
+                break  # exito, salir del loop de reintentos
+            except Exception as e:
+                es_503 = "503" in str(e) or "UNAVAILABLE" in str(e)
+                if es_503 and intento < max_intentos:
+                    espera = espera_base * intento
+                    logger.warning(
+                        "Gemini 503 en intento %d/%d para sesion %s. Reintentando en %ds.",
+                        intento, max_intentos, self.session_id, espera,
+                    )
+                    await asyncio.sleep(espera)
+                else:
+                    logger.error(
+                        "Error en Agente 3 (intento %d/%d) para sesion %s: %s",
+                        intento, max_intentos, self.session_id, e,
+                    )
+                    await self.queue.put({
+                        "tipo": "error",
+                        "mensaje": "Error al generar los briefs. Por favor reintenta.",
+                    })
+                    break
+
+        await self.queue.put({"tipo": "done"})
