@@ -108,21 +108,35 @@ class Agente3Runner:
             for b in briefs:
                 rut = b.get("rut_empresa", "")
 
-                # Enriquecer con BD si faltan campos estructurales requeridos
-                campos_bd = {"razon_social", "rubro", "direccion"}
-                if campos_bd - b.keys():
+                # Enriquecer con BD si falta cualquier campo requerido por el schema
+                campos_requeridos_bd = {
+                    "razon_social", "rubro", "direccion",
+                    "n_socios", "nombre_socio_principal",
+                    "tiene_empresas_relacionadas",
+                }
+                if campos_requeridos_bd - b.keys():
                     detalle = queries.obtener_detalle_empresa(rut)
                     if detalle:
                         b.setdefault("razon_social", detalle.get("razon_social", ""))
                         b.setdefault("rubro", detalle.get("rubro", ""))
                         b.setdefault("direccion", detalle.get("direccion", ""))
                         b.setdefault("score_compuesto", detalle.get("score_oportunidad", 0.0))
-                        # Construir metricas desde BD si no viene de ninguna forma
+                        # Maya societaria (Tarea 1 PDF)
+                        b.setdefault("n_socios", detalle.get("n_socios", 0))
+                        b.setdefault("nombre_socio_principal", detalle.get("nombre_socio_principal", ""))
+                        b.setdefault("tiene_empresas_relacionadas", detalle.get("tiene_empresas_relacionadas", False))
+                        # Construir metricas completas desde BD si no vienen de ninguna forma
                         if "metricas" not in b and "activos_banco_clp" not in b:
                             b["metricas"] = {
                                 "activos_banco_clp": detalle.get("activos_banco_clp", 0),
+                                "activos_industria_clp": detalle.get("activos_industria_clp", 0),
+                                "share_of_wallet_pct": detalle.get("share_of_wallet_pct", 0.0),
                                 "ventas_anuales_uf": detalle.get("ventas_anuales_uf", 0.0),
                                 "variacion_ventas_pct": detalle.get("variacion_ventas_pct", 0.0),
+                                "meses_sin_venta": detalle.get("meses_sin_venta", 0),
+                                "excedente_caja_uf": detalle.get("excedente_caja_uf", 0.0),
+                                "inversiones_uf": detalle.get("inversiones_uf", 0.0),
+                                "costos_financieros_uf": detalle.get("costos_financieros_uf", 0.0),
                                 "dias_desde_ultima_visita": detalle.get("dias_desde_ultima_visita", 0),
                             }
 
@@ -132,12 +146,18 @@ class Agente3Runner:
                 # score_compuesto desde el ranking si no esta en BD ni en b
                 b.setdefault("score_compuesto", score_por_rut.get(rut, 0.0))
 
-                # Construir metricas si viene plano (compatibilidad)
+                # Construir metricas si viene plano (compatibilidad con LLM)
                 if "metricas" not in b and "activos_banco_clp" in b:
                     b["metricas"] = {
                         "activos_banco_clp": b.pop("activos_banco_clp", 0),
+                        "activos_industria_clp": b.pop("activos_industria_clp", 0),
+                        "share_of_wallet_pct": b.pop("share_of_wallet_pct", 0.0),
                         "ventas_anuales_uf": b.pop("ventas_anuales_uf", 0.0),
                         "variacion_ventas_pct": b.pop("variacion_ventas_pct", 0.0),
+                        "meses_sin_venta": b.pop("meses_sin_venta", 0),
+                        "excedente_caja_uf": b.pop("excedente_caja_uf", 0.0),
+                        "inversiones_uf": b.pop("inversiones_uf", 0.0),
+                        "costos_financieros_uf": b.pop("costos_financieros_uf", 0.0),
                         "dias_desde_ultima_visita": b.pop("dias_desde_ultima_visita", 0),
                     }
                 briefs_validados.append(BriefVisita(**b))
