@@ -10,6 +10,7 @@ Recibe el ranking aprobado del Agente 1 y el comentario del ejecutivo.
 import asyncio
 import json
 import logging
+from collections import Counter
 
 from google.adk.agents import Agent
 from google.adk.runners import Runner
@@ -17,7 +18,7 @@ from google.adk.sessions import InMemorySessionService
 from google.genai import types
 
 from db import queries
-from models.schemas import EstadoSesion, VisitaSeleccionada
+from models.schemas import VisitaSeleccionada
 
 logger = logging.getLogger(__name__)
 
@@ -106,13 +107,34 @@ class Agente2Runner:
         """
         Guarda las visitas seleccionadas en el estado de sesion.
 
+        Valida que se seleccionen entre 5 y 7 visitas (objetivo semanal del banco)
+        y que no haya mas de 2 visitas el mismo dia (viabilidad operativa).
+
         Args:
             items: Lista de dicts con campos de VisitaSeleccionada.
 
         Returns:
-            Confirmacion o mensaje de error.
+            Confirmacion o mensaje de error descriptivo para que el LLM corrija.
         """
         try:
+            # Validacion 1: cantidad entre 5 y 7 (requerimiento de negocio)
+            if not (5 <= len(items) <= 7):
+                return (
+                    f"Error: debes seleccionar entre 5 y 7 visitas. "
+                    f"Seleccionaste {len(items)}. "
+                    f"Ajusta la seleccion y llama a guardar_visitas() nuevamente."
+                )
+
+            # Validacion 2: no mas de 2 visitas el mismo dia (viabilidad operativa)
+            dias_count = Counter(item.get("dia_visita_sugerido", "") for item in items)
+            dias_sobrecargados = [dia for dia, count in dias_count.items() if count > 2]
+            if dias_sobrecargados:
+                return (
+                    f"Error: los dias {dias_sobrecargados} tienen mas de 2 visitas. "
+                    f"Redistribuye entre Lunes y Viernes (maximo 2 visitas por dia) "
+                    f"y llama a guardar_visitas() nuevamente."
+                )
+
             self.queue.put_nowait({"tipo": "progreso", "paso": 3, "mensaje": f"Definiendo estrategia — {len(items)} visitas"})
             visitas_validadas = [VisitaSeleccionada(**item) for item in items]
             self.sesiones[self.session_id]["visitas_seleccionadas"] = [
