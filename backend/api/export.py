@@ -12,6 +12,15 @@ from fastapi.responses import StreamingResponse
 
 from sesiones_store import SESIONES
 
+# WeasyPrint se importa a nivel de modulo para permitir mocking en tests.
+# Puede ser lento en el primer uso (carga fuentes del sistema).
+try:
+    from weasyprint import HTML as WeasyHTML
+except ImportError:
+    # Si no esta instalado (entorno de tests sin WeasyPrint), se define como None.
+    # El endpoint fallara con un error claro si se invoca sin la dependencia.
+    WeasyHTML = None
+
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
@@ -30,10 +39,11 @@ PLANTILLA_PDF = """
   .brief {{ border: 1px solid #ddd; border-radius: 4px; padding: 14px; margin-bottom: 16px; page-break-inside: avoid; }}
   .brief-header {{ display: flex; justify-content: space-between; margin-bottom: 8px; }}
   .empresa {{ font-weight: bold; font-size: 13px; }}
+  .subtitulo {{ color: #555; font-size: 11px; }}
   .dia {{ color: #555; font-size: 11px; }}
   .tags {{ margin: 6px 0; }}
   .tag {{ background: #f0f0f0; border: 1px solid #ddd; border-radius: 10px; padding: 2px 8px; font-size: 10px; margin-right: 4px; }}
-  .metricas {{ display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 8px 0; background: #f8f8f8; padding: 8px; border-radius: 4px; }}
+  .metricas {{ display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin: 8px 0; background: #f8f8f8; padding: 8px; border-radius: 4px; }}
   .metrica-valor {{ font-weight: bold; font-size: 13px; }}
   .metrica-label {{ font-size: 10px; color: #777; }}
   .seccion-label {{ font-size: 10px; color: #777; text-transform: uppercase; letter-spacing: 1px; margin: 10px 0 4px; }}
@@ -61,26 +71,21 @@ BRIEF_TEMPLATE = """
   <div class="brief-header">
     <div>
       <div class="empresa">{razon_social}</div>
-      <div class="ejecutivo">{rubro} &nbsp;|&nbsp; {direccion}</div>
+      <div class="subtitulo">{rubro} &nbsp;|&nbsp; {direccion}</div>
+      <div class="subtitulo">Socios: {n_socios} ({nombre_socio_principal})</div>
     </div>
     <div class="dia">Visita: <strong>{dia_visita}</strong> &nbsp;|&nbsp; Score: <strong>{score}</strong></div>
   </div>
-  <div class="tags">
-    {tags_html}
-  </div>
+  <div class="tags">{tags_html}</div>
   <div class="metricas">
-    <div>
-      <div class="metrica-valor">${activos_banco:,.0f}</div>
-      <div class="metrica-label">Activos en banco</div>
-    </div>
-    <div>
-      <div class="metrica-valor">{ventas_anuales:,.0f} UF</div>
-      <div class="metrica-label">Ventas anuales</div>
-    </div>
-    <div>
-      <div class="metrica-valor">{variacion_ventas:+.1f}%</div>
-      <div class="metrica-label">Variacion ventas</div>
-    </div>
+    <div><div class="metrica-valor">${activos_banco:,.0f}</div><div class="metrica-label">Activos en banco (CLP)</div></div>
+    <div><div class="metrica-valor">${activos_industria:,.0f}</div><div class="metrica-label">Activos industria (CLP)</div></div>
+    <div><div class="metrica-valor">{sow:.1f}%</div><div class="metrica-label">Share of Wallet</div></div>
+    <div><div class="metrica-valor">{ventas_anuales:,.0f} UF</div><div class="metrica-label">Ventas anuales</div></div>
+    <div><div class="metrica-valor">{variacion_ventas:+.1f}%</div><div class="metrica-label">Variacion ventas</div></div>
+    <div><div class="metrica-valor">{excedente_caja:.0f} UF</div><div class="metrica-label">Excedente caja</div></div>
+    <div><div class="metrica-valor">{inversiones:.0f} UF</div><div class="metrica-label">Inversiones</div></div>
+    <div><div class="metrica-valor">{costos_financieros:.0f} UF</div><div class="metrica-label">Costos financieros</div></div>
   </div>
   <div class="seccion-label">Oportunidad detectada</div>
   <div class="oportunidad">{oportunidad}</div>
@@ -120,9 +125,16 @@ def _construir_html(sesion: dict) -> str:
             dia_visita=b.get("dia_visita", ""),
             score=b.get("score_compuesto", 0),
             tags_html=tags_html,
+            n_socios=b.get("n_socios", 0),
+            nombre_socio_principal=b.get("nombre_socio_principal", "N/A"),
             activos_banco=metricas.get("activos_banco_clp", 0),
+            activos_industria=metricas.get("activos_industria_clp", 0),
+            sow=metricas.get("share_of_wallet_pct", 0),
             ventas_anuales=metricas.get("ventas_anuales_uf", 0),
             variacion_ventas=metricas.get("variacion_ventas_pct", 0),
+            excedente_caja=metricas.get("excedente_caja_uf", 0),
+            inversiones=metricas.get("inversiones_uf", 0),
+            costos_financieros=metricas.get("costos_financieros_uf", 0),
             oportunidad=b.get("oportunidad", ""),
             preguntas_html=preguntas_html,
         )
@@ -155,10 +167,8 @@ async def exportar_plan(session_id: str):
         )
 
     try:
-        # WeasyPrint puede ser lento en el primer uso (carga fuentes del sistema)
-        from weasyprint import HTML
         html_content = _construir_html(sesion)
-        pdf_bytes = HTML(string=html_content).write_pdf()
+        pdf_bytes = WeasyHTML(string=html_content).write_pdf()
 
         nombre_ejecutivo = sesion.get("nombre_ejecutivo", "ejecutivo").replace(" ", "_")
         filename = f"plan_visitas_pyme_{nombre_ejecutivo}.pdf"
