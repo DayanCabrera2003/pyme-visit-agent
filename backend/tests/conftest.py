@@ -1,6 +1,10 @@
 """Fixtures compartidos entre todos los tests del backend."""
+import sys
 import os
 import pytest
+
+# Permite correr pytest desde dentro de backend/ sin PYTHONPATH
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def pytest_configure(config):
