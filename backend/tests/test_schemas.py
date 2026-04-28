@@ -100,3 +100,43 @@ def test_aprobacion_request_acepta_lista_vacia():
         comentario="Sin comentarios.",
     )
     assert req.elementos_descartados == []
+
+
+def test_metricas_empresa_incluye_campos_financieros_extendidos():
+    """MetricasEmpresa debe incluir los campos financieros completos del banco y la industria."""
+    m = MetricasEmpresa(
+        activos_banco_clp=5_000_000_000,
+        activos_industria_clp=20_000_000_000,
+        share_of_wallet_pct=25.0,
+        ventas_anuales_uf=1200.0,
+        variacion_ventas_pct=8.5,
+        meses_sin_venta=0,
+        excedente_caja_uf=150.0,
+        inversiones_uf=200.0,
+        costos_financieros_uf=80.0,
+        dias_desde_ultima_visita=45,
+    )
+    assert m.activos_industria_clp == 20_000_000_000
+    assert m.inversiones_uf == 200.0
+    assert m.costos_financieros_uf == 80.0
+    assert m.excedente_caja_uf == 150.0
+
+
+def test_brief_visita_incluye_maya_societaria():
+    """BriefVisita debe incluir datos de la maya societaria de la empresa."""
+    b = BriefVisita(
+        rut_empresa="11.111.111-1",
+        razon_social="Empresa A",
+        rubro="Comercio",
+        direccion="Calle 1",
+        dia_visita="Lunes",
+        score_compuesto=80.0,
+        metricas=MetricasEmpresa(),
+        oportunidad="Hay oportunidad de credito.",
+        n_socios=2,
+        nombre_socio_principal="Juan Perez",
+        tiene_empresas_relacionadas=False,
+    )
+    assert b.n_socios == 2
+    assert b.nombre_socio_principal == "Juan Perez"
+    assert b.tiene_empresas_relacionadas is False

@@ -77,10 +77,16 @@ class VisitaSeleccionada(BaseModel):
 
 
 class MetricasEmpresa(BaseModel):
-    """Metricas financieras clave de una empresa para el brief."""
+    """Metricas financieras completas de una empresa para el brief (carpeta tributaria + banco)."""
     activos_banco_clp: int = 0
+    activos_industria_clp: int = 0
+    share_of_wallet_pct: float = 0.0
     ventas_anuales_uf: float = 0.0
     variacion_ventas_pct: float = 0.0
+    meses_sin_venta: int = 0
+    excedente_caja_uf: float = 0.0
+    inversiones_uf: float = 0.0
+    costos_financieros_uf: float = 0.0
     dias_desde_ultima_visita: int = 0
 
 
@@ -96,6 +102,10 @@ class BriefVisita(BaseModel):
     metricas: MetricasEmpresa
     oportunidad: str
     preguntas_sugeridas: list[str] = []
+    # Maya societaria
+    n_socios: int = 0
+    nombre_socio_principal: str = ""
+    tiene_empresas_relacionadas: bool = False
 
 
 class SessionState(BaseModel):
@@ -112,6 +122,9 @@ class SessionState(BaseModel):
     visitas_seleccionadas: list[VisitaSeleccionada] = []
     comentario_2: str = ""
     briefs_finales: list[BriefVisita] = []
+    # Deteccion de sesgo por rubro (Tarea 5)
+    advertencias_sesgo: list[str] = []
+    cartera_completa_raw: list[dict] = []
 
 
 # --- Request/Response de la API ---
