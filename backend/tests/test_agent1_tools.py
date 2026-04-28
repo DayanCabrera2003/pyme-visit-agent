@@ -132,3 +132,57 @@ def test_construir_tags_sin_venta(runner):
     }
     tags = runner.construir_tags(empresa, mes_actual="abril")
     assert any("4 meses" in t for t in tags)
+
+
+def test_detectar_sesgo_rubros_alerta_cuando_rubro_ausente_del_top10():
+    """Si un rubro representa >10% de la cartera pero no aparece en el top 10, debe generar alerta."""
+    sesiones = {"s": {}}
+    runner = Agente1Runner(sesiones=sesiones, session_id="s")
+
+    # Cartera con 20 empresas: 12 de Comercio, 8 de Construccion
+    cartera = (
+        [{"rut_empresa": f"1{i}", "rubro": "Comercio"} for i in range(12)] +
+        [{"rut_empresa": f"2{i}", "rubro": "Construccion"} for i in range(8)]
+    )
+    # Top 10: solo empresas de Comercio
+    top10_ruts = {f"1{i}" for i in range(10)}
+
+    advertencias = runner.detectar_sesgo_rubros(cartera, top10_ruts)
+
+    assert len(advertencias) == 1
+    assert "Construccion" in advertencias[0]
+
+
+def test_detectar_sesgo_rubros_sin_alerta_cuando_rubro_esta_presente():
+    """No debe generar alerta si el rubro relevante tiene al menos una empresa en top 10."""
+    sesiones = {"s": {}}
+    runner = Agente1Runner(sesiones=sesiones, session_id="s")
+
+    cartera = (
+        [{"rut_empresa": f"1{i}", "rubro": "Comercio"} for i in range(12)] +
+        [{"rut_empresa": f"2{i}", "rubro": "Construccion"} for i in range(8)]
+    )
+    # Top 10: 9 de Comercio + 1 de Construccion
+    top10_ruts = {f"1{i}" for i in range(9)} | {"20"}
+
+    advertencias = runner.detectar_sesgo_rubros(cartera, top10_ruts)
+
+    assert len(advertencias) == 0
+
+
+def test_detectar_sesgo_rubros_ignora_rubros_marginales():
+    """Rubros con menos del 10% de la cartera no generan alerta aunque no esten en top 10."""
+    sesiones = {"s": {}}
+    runner = Agente1Runner(sesiones=sesiones, session_id="s")
+
+    # 18 Comercio + 1 Transporte (solo 5%) + 1 Agricultura (solo 5%)
+    cartera = (
+        [{"rut_empresa": f"1{i}", "rubro": "Comercio"} for i in range(18)] +
+        [{"rut_empresa": "t1", "rubro": "Transporte"}] +
+        [{"rut_empresa": "a1", "rubro": "Agricultura"}]
+    )
+    top10_ruts = {f"1{i}" for i in range(10)}
+
+    advertencias = runner.detectar_sesgo_rubros(cartera, top10_ruts)
+
+    assert len(advertencias) == 0

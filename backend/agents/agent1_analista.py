@@ -11,6 +11,7 @@ sin usar variables globales (patron mas seguro para concurrencia futura).
 import asyncio
 import json
 import logging
+from collections import Counter
 from datetime import datetime
 from typing import Any
 
@@ -136,6 +137,7 @@ class Agente1Runner:
             )
             self.queue.put_nowait({"tipo": "progreso", "paso": 1, "mensaje": f"Cartera cargada — {len(empresas)} empresas"})
             self.queue.put_nowait({"tipo": "progreso", "paso": 2, "mensaje": "Analizando empresas..."})
+            self.sesiones[self.session_id]["cartera_completa_raw"] = empresas
             return json.dumps(empresas, ensure_ascii=False, default=str)
         except Exception as e:
             logger.error("Error al obtener cartera de '%s': %s", nombre_ejecutivo, e)
@@ -170,10 +172,23 @@ class Agente1Runner:
             self.sesiones[self.session_id]["cartera_completa"] = [
                 r.model_dump() for r in ranking_validado
             ]
+            # Detectar sesgo de rubros y guardarlo en la sesion
+            cartera_completa = self.sesiones[self.session_id].get("cartera_completa_raw", [])
+            top10_ruts = {r.rut_empresa for r in ranking_validado[:10]}
+            advertencias_sesgo = self.detectar_sesgo_rubros(cartera_completa, top10_ruts)
+            self.sesiones[self.session_id]["advertencias_sesgo"] = advertencias_sesgo
+
+            if advertencias_sesgo:
+                logger.warning(
+                    "Sesgo de rubros detectado en sesion %s: %s",
+                    self.session_id, advertencias_sesgo
+                )
+
             # Notificar al SSE que hay resultado disponible
             self.queue.put_nowait({
                 "tipo": "resultado",
                 "items": [r.model_dump() for r in ranking_validado],
+                "advertencias_sesgo": advertencias_sesgo,
             })
             logger.info(
                 "Ranking guardado: %d empresas para sesion %s",
@@ -267,6 +282,49 @@ class Agente1Runner:
         meses = list(MESES_ES.values())
         idx = meses.index(mes_actual.lower()) if mes_actual.lower() in meses else 0
         return meses[(idx + 1) % 12]
+
+    def detectar_sesgo_rubros(self, cartera: list[dict], top10_ruts: set[str]) -> list[str]:
+        """
+        Detecta rubros con representacion significativa en la cartera que no
+        aparecen en el top 10 del ranking. Mitiga el riesgo de sesgo cognitivo
+        identificado en la Tarea 3 del PDF de requerimientos.
+
+        Args:
+            cartera: Lista de empresas con campo 'rubro'.
+            top10_ruts: Conjunto de RUTs en el top 10 del ranking.
+
+        Returns:
+            Lista de strings con advertencias. Vacia si no hay sesgo detectado.
+        """
+        total = len(cartera)
+        if total == 0:
+            return []
+
+        rubros_cartera = Counter(e.get("rubro") or "Sin rubro" for e in cartera)
+
+        # Rubros con presencia significativa (>= 10% de la cartera)
+        rubros_relevantes = {
+            rubro for rubro, count in rubros_cartera.items()
+            if count / total >= 0.10
+        }
+
+        # Rubros presentes en el top 10
+        rubros_top10 = {
+            e.get("rubro") or "Sin rubro"
+            for e in cartera
+            if e.get("rut_empresa") in top10_ruts
+        }
+
+        advertencias = []
+        for rubro in sorted(rubros_relevantes):
+            if rubro not in rubros_top10:
+                pct = rubros_cartera[rubro] / total * 100
+                advertencias.append(
+                    f"Atencion: el rubro '{rubro}' representa el {pct:.0f}% de la cartera "
+                    f"pero no aparece en el top 10 del ranking. Revisa si existe sesgo de seleccion."
+                )
+
+        return advertencias
 
     # --- Ejecucion del agente ---
 
