@@ -46,7 +46,12 @@ function iniciarAgente(nAgente) {
 
   eventoSource.addEventListener('resultado', e => {
     const data = JSON.parse(e.data);
-    renderizarResultados(nAgente, data.items);
+    if (nAgente === 3) {
+      // Los briefs se guardan para mostrarOutputFinal; no se renderizan en tabla
+      sesion.briefs = data.items;
+    } else {
+      renderizarResultados(nAgente, data.items);
+    }
   });
 
   eventoSource.addEventListener('error', e => {
