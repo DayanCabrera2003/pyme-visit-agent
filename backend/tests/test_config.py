@@ -1,15 +1,23 @@
 """Tests de configuracion — verifica lectura de variables de entorno."""
 import sys
 import importlib
+from unittest.mock import patch
 import pytest
 
 
 def _reimportar_config():
-    """Elimina el modulo del cache y lo reimporta para forzar relectura del entorno."""
+    """
+    Elimina el modulo del cache y lo reimporta para forzar relectura del entorno.
+
+    load_dotenv se mockea como no-op para que los valores del .env real no
+    sobreescriban las variables que monkeypatch acaba de modificar.
+    """
     for key in list(sys.modules.keys()):
-        if "config" in key and "backend" in key:
+        if key == "config" or key == "backend.config":
             del sys.modules[key]
-    return importlib.import_module("backend.config")
+    # load_dotenv no-op: evita que el .env real restaure las vars eliminadas
+    with patch("dotenv.load_dotenv"):
+        return importlib.import_module("config")
 
 
 def test_config_falla_sin_gemini_api_key(monkeypatch):
